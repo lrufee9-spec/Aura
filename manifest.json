@@ -1,0 +1,22 @@
+{
+  "name": "AuraOS Neural Workspace",
+  "short_name": "AuraOS",
+  "description": "A high-performance personal assistant web desktop UI.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "https://picsum.photos/id/65/192/192",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://picsum.photos/id/65/512/512",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

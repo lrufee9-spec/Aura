@@ -1,0 +1,10 @@
+
+{
+  "name": "AuraOS Neural Workspace",
+  "description": "A high-performance personal assistant web desktop UI with AI-powered features, file management, terminal emulation, and device integration.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
