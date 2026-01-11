@@ -1,75 +1,59 @@
-import { GoogleGenAI, Modality } from "@google/genai";
+/**
+ * AuraOS Neural Service
+ * Handles real-time communication with Gemini 1.5 Flash
+ */
 
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "AIza-KEY-NOT-SET";
-const ai = new GoogleGenAI({ apiKey: apiKey });
+// In Vite, we access the defined env variables from vite.config.ts
+const API_KEY = (import.meta.env.VITE_GEMINI_API_KEY) || (process.env.GEMINI_API_KEY) || '';
+const BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 
-export const chatWithGemini = async (prompt: string, history: { role: string; parts: { text: string }[] }[]) => {
+export const chatWithGemini = async (prompt: string, history: any[]) => {
+  if (!API_KEY || API_KEY === 'MISSING_KEY') {
+    return "OFFLINE_MODE: No API Key detected. Please set GEMINI_API_KEY in Netlify environment variables.";
+  }
+
   try {
-    const formattedHistory = history.map(h => ({
-      role: h.role === 'assistant' ? 'model' : 'user',
-      parts: h.parts
-    }));
-
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: [
-        ...formattedHistory,
-        { role: 'user', parts: [{ text: prompt }] }
-      ],
-      config: {
-        systemInstruction: "You are Aura Assistant, the core intelligence of AuraOS. You help users manage their global workspace, including secure file vaults, GPS tracking, and the DJ Music Suite. You are highly professional, concise, and futuristic.",
-        temperature: 0.7,
-      }
+    const response = await fetch(`${BASE_URL}?key=${API_KEY}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contents: history.length > 0 ? history : [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 1024,
+        }
+      }),
     });
-    return response.text || "I'm sorry, I couldn't process that.";
-  } catch (error) {
-    console.error("Gemini Error:", error);
-    return "Error connecting to AI service.";
+
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error.message);
+    }
+
+    return data.candidates[0].content.parts[0].text;
+  } catch (error: any) {
+    console.error("Neural Link Failure:", error);
+    return `SYSTEM_ERROR: ${error.message || "Unknown disconnection"}`;
   }
 };
+
+/**
+ * Voice & Audio Utilities 
+ * (Placeholders to satisfy AIChatApp.tsx imports)
+ */
 
 export const generateVoiceResponse = async (text: string) => {
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-preview-tts",
-      contents: [{ parts: [{ text: `Respond naturally as Aura: ${text}` }] }],
-      config: {
-        responseModalities: [Modality.AUDIO],
-        speechConfig: {
-          voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: 'Kore' },
-          },
-        },
-      },
-    });
-
-    const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-    return base64Audio;
-  } catch (error) {
-    console.error("TTS Error:", error);
-    return null;
-  }
+  console.log("Voice synthesis requested for:", text.substring(0, 20) + "...");
+  return null; // Return null until TTS engine is linked
 };
 
-export const terminalCommandExec = async (command: string) => {
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
-      contents: `Execute for AuraOS Shell: ${command}`,
-      config: {
-        systemInstruction: "You are the Aura Neural Shell (ANS). Provide concise, technical terminal outputs using [OK], [FAIL], [SYNCING]. System is AuraOS v2.5.",
-        temperature: 0.1,
-      }
-    });
-    return response.text || "Command execution failed.";
-  } catch (error) {
-    console.error("Terminal Error:", error);
-    return `sh: command execution error: ${command}`;
-  }
-};
-
-export const decodeBase64 = (base64: string) => {
-  const binaryString = atob(base64);
+export const decodeBase64 = (base64: string): Uint8Array => {
+  const binaryString = window.atob(base64);
   const bytes = new Uint8Array(binaryString.length);
   for (let i = 0; i < binaryString.length; i++) {
     bytes[i] = binaryString.charCodeAt(i);
@@ -77,21 +61,6 @@ export const decodeBase64 = (base64: string) => {
   return bytes;
 };
 
-export const decodeAudioData = async (
-  data: Uint8Array,
-  ctx: AudioContext,
-  sampleRate: number = 24000,
-  numChannels: number = 1,
-): Promise<AudioBuffer> => {
-  const dataInt16 = new Int16Array(data.buffer);
-  const frameCount = dataInt16.length / numChannels;
-  const buffer = ctx.createBuffer(numChannels, frameCount, sampleRate);
-
-  for (let channel = 0; channel < numChannels; channel++) {
-    const channelData = buffer.getChannelData(channel);
-    for (let i = 0; i < frameCount; i++) {
-      channelData[i] = dataInt16[i * numChannels + channel] / 32768.0;
-    }
-  }
-  return buffer;
+export const decodeAudioData = async (data: Uint8Array, ctx: AudioContext): Promise<AudioBuffer> => {
+  return await ctx.decodeAudioData(data.buffer);
 };
