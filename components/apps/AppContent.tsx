@@ -10,7 +10,7 @@ import BooksApp from './BooksApp';
 import TerminalApp from './TerminalApp';
 import FilesApp from './FilesApp';
 import CameraApp from './CameraApp';
-import MapApp from './GpsApp';
+import MapApp from '../GpsApp';
 import StorageApp from './StorageApp';
 import ProfileApp from './ProfileApp';
 import ControllerApp from './ControllerApp';
