@@ -1,6 +1,7 @@
 import { GoogleGenAI, Modality } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "AIza-KEY-NOT-SET";
+const ai = new GoogleGenAI({ apiKey: apiKey });
 
 export const chatWithGemini = async (prompt: string, history: { role: string; parts: { text: string }[] }[]) => {
   try {
