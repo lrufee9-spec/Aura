@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -12,7 +12,19 @@ const DefaultIcon = L.icon({
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
-// Define the interface to accept the prop from AppContent router
+/**
+ * HELPER: ChangeView
+ * This component handles the 'Real-Time' movement. 
+ * When the position changes, it forces the Leaflet engine to re-center.
+ */
+function ChangeView({ center }: { center: [number, number] }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(center, 15);
+  }, [center, map]);
+  return null;
+}
+
 interface GpsAppProps {
   onBackToHome?: () => void;
 }
@@ -23,33 +35,30 @@ const GpsApp: React.FC<GpsAppProps> = ({ onBackToHome }) => {
 
   useEffect(() => {
     if (!navigator.geolocation) {
-      setError("Geolocation not supported");
+      setError("Hardware not detected");
       return;
     }
 
     const watchId = navigator.geolocation.watchPosition(
       (pos) => {
-        console.log("AuraOS: Position Locked");
+        console.log("AuraOS: Satellite Lock Established");
         setPosition([pos.coords.latitude, pos.coords.longitude]);
         setError(null);
       },
       (err) => {
         console.warn(`GPS Warning (${err.code}): ${err.message}`);
-        
-        // Error Code 1 = Permission Denied
-        // Error Code 3 = Timeout
         if (err.code === 3 || err.code === 1) {
-          // Fallback to standard accuracy if High Accuracy fails
+          // Fallback to lower accuracy if Satellite (GPS) times out
           navigator.geolocation.getCurrentPosition(
             (pos) => setPosition([pos.coords.latitude, pos.coords.longitude]),
-            (e) => setError("Could not acquire signal"),
+            (e) => setError("Signal acquisition failed"),
             { enableHighAccuracy: false }
           );
         }
       },
       { 
         enableHighAccuracy: true, 
-        timeout: 10000, // 10 second timeout 
+        timeout: 10000, 
         maximumAge: 0 
       }
     );
@@ -58,9 +67,9 @@ const GpsApp: React.FC<GpsAppProps> = ({ onBackToHome }) => {
   }, []);
 
   return (
-    <div className="h-full w-full bg-[#050505] overflow-hidden rounded-lg flex flex-col">
-      {/* OS Header Bar */}
-      <div className="p-4 glass-dark flex justify-between items-center border-b border-white/10 shrink-0">
+    <div className="h-full w-full bg-[#050505] overflow-hidden rounded-lg flex flex-col font-sans">
+      {/* Header with AuraOS Branding */}
+      <div className="p-4 glass-dark flex justify-between items-center border-b border-white/10 shrink-0 z-[1000]">
         <div className="flex flex-col">
           <h2 className="text-xs font-black uppercase tracking-widest text-blue-400">Neural GPS Signal</h2>
           {onBackToHome && (
@@ -74,14 +83,14 @@ const GpsApp: React.FC<GpsAppProps> = ({ onBackToHome }) => {
         </div>
         <div className="flex items-center gap-2">
            <span className={`w-2 h-2 rounded-full animate-pulse ${position ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
-           <span className="text-[10px] text-white/50 uppercase tracking-tighter">
-             {position ? 'Satellite Link Active' : 'Acquiring Signal...'}
+           <span className="text-[10px] text-white/50 uppercase tracking-tighter font-mono">
+             {position ? 'LINK_ACTIVE' : 'SEARCHING...'}
            </span>
         </div>
       </div>
       
-      {/* Map or Loading State */}
-      <div className="flex-1 relative">
+      {/* Primary Map Interface */}
+      <div className="flex-1 relative bg-[#0a0a0a]">
         {position ? (
           <MapContainer 
             center={position} 
@@ -89,24 +98,35 @@ const GpsApp: React.FC<GpsAppProps> = ({ onBackToHome }) => {
             style={{ height: '100%', width: '100%' }}
             zoomControl={false}
           >
+            <ChangeView center={position} />
             <TileLayer
               url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
               attribution='&copy; OpenStreetMap'
             />
             <Marker position={position}>
               <Popup className="terminal-text">
-                <span className="text-blue-500 font-bold">AuraOS NODE</span><br/>
-                Lat: {position[0].toFixed(4)}<br/>
-                Lon: {position[1].toFixed(4)}
+                <div className="p-1">
+                  <strong className="text-blue-500 uppercase text-[10px]">Active Node</strong><br/>
+                  <span className="text-[9px] opacity-70">LAT: {position[0].toFixed(4)}</span><br/>
+                  <span className="text-[9px] opacity-70">LON: {position[1].toFixed(4)}</span>
+                </div>
               </Popup>
             </Marker>
           </MapContainer>
         ) : (
-          <div className="h-full flex flex-col items-center justify-center gap-4 bg-[#0a0a0a]">
-             <div className="w-12 h-12 border-2 border-blue-500/10 border-t-blue-500 rounded-full animate-spin"></div>
-             <div className="text-center">
-               <p className="terminal-text text-[10px] text-blue-400 tracking-[0.3em] animate-pulse">SYNCHRONIZING...</p>
-               {error && <p className="text-[9px] text-red-500/60 mt-2 uppercase">{error}</p>}
+          <div className="h-full flex flex-col items-center justify-center gap-6">
+             <div className="relative">
+                <div className="w-16 h-16 border-2 border-blue-500/10 border-t-blue-500 rounded-full animate-spin"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-ping"></div>
+                </div>
+             </div>
+             <div className="text-center space-y-2">
+               <p className="terminal-text text-[10px] text-blue-400 tracking-[0.4em] animate-pulse">ACQUIRING_COORDS</p>
+               <p className="text-[9px] text-white/20 uppercase max-w-[200px] leading-relaxed">
+                 Waiting for hardware permission to synchronize with local satellite cluster...
+               </p>
+               {error && <p className="text-[9px] text-red-500/60 font-bold uppercase">{error}</p>}
              </div>
           </div>
         )}
