@@ -3,6 +3,7 @@ import React from 'react';
 import { AppId, WindowState } from '../types';
 import { APPS } from './Desktop';
 import AppContent from './apps/AppContent';
+import GpsApp from './GpsApp';
 
 interface WindowManagerProps {
   openWindows: Record<AppId, WindowState>;
