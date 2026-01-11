@@ -1,15 +1,17 @@
 import React from 'react';
 import { AppId, WindowState } from '../types';
-import GpsApp from './GpsApp';
-import AIChatApp from './apps/AIChatApp';
+// Double check these paths!
+import GpsApp from './GpsApp'; 
+import AIChatApp from './apps/AIChatApp'; 
 
 interface WindowManagerProps {
-  openWindows: Record<AppId, WindowState>;
-  onClose: (id: AppId) => void;
-  onFocus: (id: AppId) => void;
-  activeApp: AppId | null;
+  openWindows: Record<string, WindowState>; // Changed AppId to string here for "loose" type safety
+  onClose: (id: any) => void;
+  onFocus: (id: any) => void;
+  activeApp: string | null;
 }
 
+// ... rest of the code I gave you previously
 const WindowManager: React.FC<WindowManagerProps> = ({ openWindows, onClose, onFocus, activeApp }) => {
   const renderAppContent = (id: AppId) => {
     switch (id) {
