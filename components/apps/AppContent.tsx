@@ -1,34 +1,31 @@
 import React from 'react';
 import { AppId } from '../../constants';
-
-// Temporary placeholders for apps we will build next
-const Placeholder = ({ name }: { name: string }) => (
-  <div className="flex flex-col items-center justify-center h-full text-zinc-500 font-mono italic">
-    <span className="text-4xl mb-4">🚀</span>
-    {name} Module Initializing...
-  </div>
-);
+import DashboardApp from './DashboardApp'; // The Robot Core
+import TerminalApp from './TerminalApp';
+import CameraApp from './CameraApp'; // For violence/threat detection
 
 interface AppContentProps {
   appId: string;
+  onNavigate?: (id: string) => void;
 }
 
 const AppContent: React.FC<AppContentProps> = ({ appId }) => {
   switch (appId) {
-    case AppId.TERMINAL:
-      return <Placeholder name="Terminal" />;
-    case AppId.AI_CHAT:
-      return <Placeholder name="Neural AI" />;
-    case AppId.CHAT:
-      return <Placeholder name="Real-time Chat" />;
-    case AppId.GPS:
-      return <Placeholder name="Satellite Navigation" />;
-    case AppId.FILES:
-      return <Placeholder name="File System" />;
     case AppId.DASHBOARD:
-      return <Placeholder name="Command Center" />;
+      return <DashboardApp />;
+    case AppId.TERMINAL:
+      return <TerminalApp />;
+    case AppId.CAMERA:
+      return <CameraApp />;
+    case AppId.AI_CHAT:
+    case AppId.CHAT:
+      return <div className="p-10 text-blue-500 animate-pulse">ROBOT_SYNC_IN_PROGRESS...</div>;
     default:
-      return <Placeholder name="Unknown System" />;
+      return (
+        <div className="flex items-center justify-center h-full text-zinc-600 font-mono italic">
+          MODULE_{appId}_STANDBY
+        </div>
+      );
   }
 };
 
