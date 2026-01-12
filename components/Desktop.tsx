@@ -1,6 +1,8 @@
 
 import React from 'react';
-import { AppId, NexusApp } from '../types';
+import { AppId } from '../constants';
+import {  } from '../constants';
+import { , NexusApp } from '../types';
 
 export const APPS: NexusApp[] = [
   { id: AppId.DASHBOARD, name: 'Command Center', icon: '🚀', color: 'bg-gradient-to-tr from-blue-600 to-indigo-700' },

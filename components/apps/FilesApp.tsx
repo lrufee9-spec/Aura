@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
-import { FileNode, AppId } from '../../types';
+import { AppId } from '../../constants';
+import { FileNode  } from '../../types';
 
 const MOCK_FILES: FileNode[] = [
   { id: 'f1', name: 'Digital_Driving_License', type: 'file', category: 'document', extension: 'PDF', size: '1.4 MB', modified: '2023-11-20', isPrivate: true, previewUrl: 'https://picsum.photos/id/60/400/300', meta: { isID: true } },
