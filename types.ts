@@ -1,38 +1,49 @@
-export type AppId = string; 
+import { AppId } from './constants';
 
-export interface WindowState {
-  id: any;
-  isOpen: boolean;
-  isMaximized: boolean;
-  zIndex: number;
-  [key: string]: any; 
-}
+/**
+ * AppIdType creates a union of all possible App IDs 
+ * (e.g., 'terminal' | 'ai_chat' | 'gps' | ...)
+ */
+export type AppIdType = typeof AppId[keyof typeof AppId];
 
+/**
+ * Standard interface for App definitions used in 
+ * Desktop and Taskbar components.
+ */
 export interface NexusApp {
-  id: any;
+  id: AppIdType;
   name: string;
   icon: string;
   color: string;
-  [key: string]: any;
 }
 
+/**
+ * State management for the Window Manager
+ */
+export interface WindowState {
+  id: AppIdType;
+  isOpen: boolean;
+  isMaximized?: boolean;
+  zIndex: number;
+}
+
+/**
+ * Real-time Message structure for Chat and AI apps
+ */
 export interface Message {
-  role: 'user' | 'assistant' | 'peer';
+  id?: string;
+  role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: number;
-  [key: string]: any;
 }
 
-// All other types made flexible to support extra data (price, creator, etc.)
-export interface Contact { id: string; name: string; [key: string]: any; }
-export interface Book { id: string; title: string; [key: string]: any; }
-export interface NewspaperPost { id: string; [key: string]: any; }
-export interface Email { id: string; subject: string; [key: string]: any; }
-export interface ContentPost { id: string; [key: string]: any; }
-export interface LiveRoom { id: string; [key: string]: any; }
-export interface DJTrack { id: string; title: string; [key: string]: any; }
-export interface CuePoint { id: string; [key: string]: any; }
-export interface FileNode { id: string; name: string; type: string; [key: string]: any; }
-export interface VideoContent { id: string; title: string; [key: string]: any; }
-export interface Peer { id: string; name: string; [key: string]: any; }
-export interface Reminder { id: string; text: string; [key: string]: any; }
+/**
+ * User Profile structure for the ProfileApp
+ */
+export interface UserProfile {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
+  lastLogin: number;
+}
