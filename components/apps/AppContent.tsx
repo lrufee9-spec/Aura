@@ -1,87 +1,52 @@
-
-import React, { useState } from 'react';
-import { AppId } from '../constants';
-import {  } from '../constants';
-import {  } from '../../types';
+import React from 'react';
+import { AppId } from '../../constants'; // Importing from constants, not types
 import AIChatApp from './AIChatApp';
-import ChatApp from './ChatApp';
-import ContentApp from './ContentApp';
-import InboxApp from './InboxApp';
-import VideoApp from './VideoApp';
-import BooksApp from './BooksApp';
-import TerminalApp from './TerminalApp';
-import FilesApp from './FilesApp';
-import CameraApp from './CameraApp';
-import MapApp from '../GpsApp';
-import StorageApp from './StorageApp';
-import ProfileApp from './ProfileApp';
-import ControllerApp from './ControllerApp';
-import ExtensionsApp from './ExtensionsApp';
-import DJMusicApp from './DJMusicApp';
-import DashboardApp from './DashboardApp';
-
-// New Mock Components
-const SimpleShell: React.FC<{ title: string; icon: string }> = ({ title, icon }) => (
-  <div className="h-full flex flex-col items-center justify-center p-8 text-center bg-[#050505]">
-    <div className="text-7xl mb-6">{icon}</div>
-    <h2 className="text-2xl font-black mb-2 text-white">{title}</h2>
-    <p className="text-gray-400 max-w-sm mb-8 font-medium">
-      Your {title.toLowerCase()} center is being synchronized with your personal cloud.
-    </p>
-    <button className="px-6 py-2 bg-blue-600 rounded-xl text-sm font-bold shadow-lg shadow-blue-600/20 active:scale-95 transition-transform">
-      Refresh Data
-    </button>
-  </div>
-);
+import GpsApp from './GpsApp';
+// Add other imports here as needed
 
 interface AppContentProps {
-  appId: AppId;
-  onClose: () => void;
+  appId: string;
+  internalView?: string;
+  onNavigate?: (view: string) => void;
 }
 
-const AppContent: React.FC<AppContentProps> = ({ appId, onClose }) => {
-  const [internalView, setInternalView] = useState<'default' | 'dj_music'>('default');
-
-  // Handle nested app navigation for Storage -> DJ Music
+const AppContent: React.FC<AppContentProps> = ({ appId, internalView, onNavigate }) => {
+  
+  // Logic for special sub-views (like DJ Music inside Storage)
   if (appId === AppId.STORAGE && internalView === 'dj_music') {
-    return <DJMusicApp onBackToStorage={() => setInternalView('default')} />;
+    return <div className="p-10 text-white text-center">DJ Music Module Loading...</div>;
   }
 
+  // Main Switchboard
   switch (appId) {
     case AppId.AI_CHAT:
-      return <AIChatApp onBackToHome={onClose} />;
-    case AppId.CHAT:
-      return <ChatApp onBackToHome={onClose} />;
-    case AppId.CONTENT:
-      return <ContentApp onBackToHome={onClose} />;
-    case AppId.INBOX:
-      return <InboxApp onBackToHome={onClose} />;
-    case AppId.VIDEO:
-      return <VideoApp onBackToHome={onClose} />;
-    case AppId.BOOKS:
-      return <BooksApp onBackToHome={onClose} />;
-    case AppId.TERMINAL:
-      return <TerminalApp />;
-    case AppId.FILES:
-      return <FilesApp onBackToHome={onClose} />;
-    case AppId.CAMERA:
-      return <CameraApp onBackToHome={onClose} />;
+      return <AIChatApp onBackToHome={() => {}} />;
+    
     case AppId.GPS:
-      return <MapApp onBackToHome={onClose} />;
-    case AppId.STORAGE:
-      return <StorageApp onBackToHome={onClose} onOpenDJMusic={() => setInternalView('dj_music')} />;
-    case AppId.PROFILE:
-      return <ProfileApp onBackToHome={onClose} />;
-    case AppId.CONTROLLER:
-      return <ControllerApp onBackToHome={onClose} />;
-    case AppId.EXTENSIONS:
-      return <ExtensionsApp onBackToHome={onClose} />;
-    case AppId.DJ_MUSIC:
-      return <DJMusicApp onBackToStorage={onClose} />;
+      return <GpsApp onBackToHome={() => {}} />;
+
+    case AppId.TERMINAL:
+      return <div className="bg-black p-4 font-mono text-green-500 h-full">Nexus Terminal v1.0.4...</div>;
+
+    case AppId.FILES:
+      return <div className="p-10 text-white">Files System Accessing...</div>;
+
+    case AppId.CHAT:
+      return <div className="p-10 text-white">Secure Messages Loading...</div>;
+
     case AppId.DASHBOARD:
-      return <DashboardApp onBackToHome={onClose} />;
+      return <div className="p-10 text-white">Command Center Active</div>;
+
     default:
-      return <SimpleShell title={(appId as string).replace('_', ' ')} icon="🚀" />;
+      return (
+        <div className="flex flex-col items-center justify-center h-full bg-zinc-950 text-white p-6 text-center">
+          <div className="w-16 h-16 border-2 border-white/10 rounded-2xl flex items-center justify-center mb-4 text-2xl">
+            💠
+          </div>
+          <h2 className="text-sm font-bold tracking-widest uppercase opacity-40">{appId}</h2>
+          <p className="text-[10px] mt-2 text-zinc-500 uppercase">Module initialization in progress...</p>
+        </div>
+      );
   }
 };
 
